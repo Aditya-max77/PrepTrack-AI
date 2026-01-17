@@ -1,0 +1,8 @@
+{
+  "name": "PrepTrack AI",
+  "description": "A high-performance placement preparation tracker with domain-specific learning paths, mock tests, and AI-powered interview simulations.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}
