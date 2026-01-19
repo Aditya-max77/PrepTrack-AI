@@ -1,0 +1,47 @@
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+    const API_KEY = "AIzaSyB_LBAw7yP-aHFATQcH_0g3FnfE6aK5k68"; 
+    
+    const chatBtn = document.getElementById('chat-button');
+    const chatWin = document.getElementById('chat-window');
+    const closeBtn = document.getElementById('close-chat');
+    const sendBtn = document.getElementById('send-btn');
+    const userInput = document.getElementById('user-input');
+    const chatHistory = document.getElementById('chat-history');
+
+    chatBtn.onclick = () => { chatWin.style.display = 'flex'; chatBtn.style.transform = 'scale(0)'; };
+    closeBtn.onclick = () => { chatWin.style.display = 'none'; chatBtn.style.transform = 'scale(1)'; };
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        // User Message (Text only)
+        chatHistory.innerHTML += `<div style="background: #4285f4; color: white; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%;">${text}</div>`;
+        userInput.value = '';
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+            });
+            
+            const data = await response.json();
+            const rawBotText = data.candidates[0].content.parts[0].text;
+            
+            // 2. USE MARKED TO CONVERT * AND # INTO HTML
+            const cleanBotText = marked.parse(rawBotText);
+            
+            chatHistory.innerHTML += `<div style="background: #eeeeee; color: #333; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 13px;">${cleanBotText}</div>`;
+        } catch (error) {
+            chatHistory.innerHTML += `<div style="color: red; font-size: 12px;">Error. Check connection.</div>`;
+        }
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    sendBtn.onclick = sendMessage;
+    userInput.onkeypress = (e) => { if (e.key === "Enter") sendMessage(); };
+</script>
